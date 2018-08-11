@@ -1,0 +1,69 @@
+The enclosed files make the interface to OS/2 Communications Manager in Microsoft C much easier.  The routines have been used with OS/2 EE 1.3 with no problems.
+
+The files should be used as follows:
+
+HOST.OBJ and HOST.DEF must be included in the make file definition for your program.
+
+HOST.H must be included in you C source file.
+
+HOST.C is provided so the workbench may recompile it for use in different models.  It should be in the same directory as HOST.OBJ.
+
+
+
+A couple examples follow:
+
+#include <stdio.h>
+#include "HOST.H"
+void main( void )
+{
+    if( host( HostConnect, "A" ))
+    {
+        printf( "Can not connect to session A" );
+        return( 1 );
+    }
+    if( host( SearchHost, "Logon ID:" ))
+    {
+        printf( "Host is not ready to receive an ID" );
+        return( 2 );
+    }
+    host( SendKeyToHost, "MyLognID@E" );
+    host( WaitForHost, "" );
+    if( host( SearchHost, "Password:" ))
+    {
+        printf( "Host did not ask for password" );
+        return( 3 );
+    }
+...
+
+The above program segment (1) connects to host session "A", (2) looks for a message asking for a logon ID, (3) sends the string "MyLogonID" followed by an enter, (4) waits for the host to unlock the keyboard, (5) checks for a message asking for a password.
+
+
+
+#include "HOST.H"
+void main( void )
+{
+    int funcnum,
+        infolen,
+        errorcode;
+    char infostr[80];
+
+    if( host( HostConnect, "A" ))
+    {
+        printf( "Can not connect to session A" );
+        return( 1 );
+    }
+    host( HostDisconnect, "A" );
+    funcnum = ReceiveFile;
+    errorcode = 1;
+    infostr = "a:report.dat A:REPORT SCRIPT A (CRLF ASCII"
+    infolen = 42;
+    hllapi( &funcnum, infostr, &infolen, &errorcode );
+...
+
+The above program segment (1) connects to host session "A", (2) disconnects after checking for errors, (3) sets the variables to download a file with errorcode telling HLLAPI to look on drive A: for the receive command infostr telling HLLAPI to get a file from session A called REPORT SCRIPT A on the host and put in on drive a: as report.dat.  See the Communications Manager manual for more details on the receive command syntax.  The errorcode variable could be checked next to verify the file transfer worked...
+
+
+Questions or comments please let me know.
+
+OS/2 Shareware: Mark R. Schmidt
+Compuserve: 72571,3356
